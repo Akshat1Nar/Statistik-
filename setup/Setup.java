@@ -10,19 +10,21 @@ public class Setup {
 	//  Database credentials
 	static final String USER = "GroupProject";
 	static final String PASS = "EasyPeasy";
+
+	static Connection conn = null;
+	static Statement stmt = null;
    
-	public static void main(String[] args) {
+	public Setup() {
 
 		System.out.println("Welcome to Our Software");
 		System.out.println("Befor begining make sure you have following as an user");
 		System.out.println("USER : GroupProject");
 		System.out.println("PASSWORD : EasyPeasy");
+		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("");
 		System.out.println("");
-
-
-		Connection conn = null;
-		Statement stmt = null;
+			
+		
 		ResultSet rs = null;
 
 		try {
@@ -41,6 +43,8 @@ public class Setup {
 		
 					if(DATABASE_NAME.equals(catalogs)){
 						System.out.println("Database already existed");
+						System.out.println("Checking for Tables...");
+						new Tables();
 						return;
 					}
 			}
@@ -51,7 +55,10 @@ public class Setup {
 			
 			String sql = "CREATE DATABASE RECORDS";
 			stmt.executeUpdate(sql);
-			System.out.println("Database created successfully...");
+			System.out.println("Database created successfully!\n");
+
+			System.out.println("Filling Tables...");
+			new Tables();
 		}
 
 		catch(SQLException se) {
