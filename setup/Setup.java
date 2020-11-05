@@ -44,7 +44,6 @@ public class Setup {
 					if(DATABASE_NAME.equals(catalogs)){
 						System.out.println("Database already existed");
 						System.out.println("Checking for Tables...");
-						new Tables();
 						return;
 					}
 			}

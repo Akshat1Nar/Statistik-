@@ -1,7 +1,6 @@
 package setup;
 import java.sql.*;
 import java.io.*;  
-import setup.Setup;
 import java.util.Scanner;  
 import gui.City;
 import gui.Interface;
@@ -15,28 +14,39 @@ import de.fhpotsdam.unfolding.geo.Location;
 
 public class Tables {
 
+	// JDBC driver name and database URL
+	public static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";  
+	public static final String DB_URL = "jdbc:mysql://localhost/";
+
+	//  Database credentials
+	public static final String USER = "GroupProject";
+	public static final String PASS = "EasyPeasy";
+
+	public static Connection conn = null;
+	public static Statement stmt = null;
+
 	// Variable to keep sql
 	// statements
-	String sql;
+	public static String sql;
 
 	// Variable to keep result
 	// of sql queries
-	ResultSet rs;
+	public static ResultSet rs;
 
 	// In betweeen varible to 
 	// access data from result
 	// variable
-	ResultSetMetaData rsmd;
+	public static ResultSetMetaData rsmd;
 
 
 	// A utility function that
 	// executes statement from
 	// given query as a string
 	// Update Statement
-	void executeStatement(){
+	public static void executeStatement(){
 
 		try{
-			Setup.stmt.executeUpdate(sql);
+			stmt.executeUpdate(sql);
 		}
 		catch(SQLException se) {
 		   //Handle errors for JDBC
@@ -45,9 +55,9 @@ public class Tables {
 	}
 
 	// Get query Statement
-	void executeStQuery(){
+	public static void executeStQuery(){
 		try{
-			rs = Setup.stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql);
 		}
 		catch(SQLException se) {
 		   //Handle errors for JDBC
@@ -57,7 +67,7 @@ public class Tables {
 
 	// A function to create markers 
 	// on all the cities
-	void fillMarkers(){
+	public static void fillMarkers(){
 		try{
 			rsmd = rs.getMetaData();
 			int columnsNumber = rsmd.getColumnCount();
@@ -93,7 +103,7 @@ public class Tables {
 	}
 
 
-	void printQuery(){
+	public static void printQuery(){
 		try{
 			rsmd = rs.getMetaData();
 			int columnsNumber = rsmd.getColumnCount();
@@ -124,7 +134,7 @@ public class Tables {
 	// It takes in.csv as a 
 	// input and fills it into
 	// database
-	void fillMainTable(){
+	public static void fillMainTable(){
 
 		// Creating table cities
 		sql = "CREATE TABLE cities (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
@@ -133,11 +143,22 @@ public class Tables {
 										  +"lng DECIMAL(20,10),"
 										  +"state VARCHAR(100),"
 										  +"population INT)";
-		executeStatement();
-
+		
 
 		// Filling table cities
 		try{
+
+			DatabaseMetaData dbm = conn.getMetaData();
+			// check if "cities" table is there
+			ResultSet tables = dbm.getTables(null, null, "cities", null);
+			if (tables.next()) {
+			  	// Table exists do nothing
+			  	return;
+			}
+
+			// Create Table
+			executeStatement();
+
 
 			Scanner in = new Scanner(new File("./databases/in.csv"));
 			// Read line by line
@@ -170,19 +191,27 @@ public class Tables {
 	// Constructor
 	// that initializes everything
 	public Tables(){
-		sql = "USE RECORDS";
-		executeStatement();
+
+		try {
+			//STEP 2: Register JDBC driver
+			Class.forName(JDBC_DRIVER);
+
+			//STEP 3: Open a connection
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
+			String DATABASE_NAME = "RECORDS";
+			stmt = conn.createStatement();
+
+
+			sql = "USE RECORDS";
+			executeStatement();
+
+		}
+		catch(Exception e){
+			System.out.println("Error in connecting to DATABASE when creating or accessing tables");
+		}
 
 		fillMainTable();
-		
-
-		sql = "SELECT * FROM cities";
-		executeStQuery();
-		fillMarkers();
-		
-		sql = "DROP DATABASE RECORDS";
-		executeStatement();
-		
+	
 	}
 
 }
