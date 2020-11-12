@@ -38,6 +38,8 @@ public class Tables {
 	// variable
 	public static ResultSetMetaData rsmd;
 
+	public static Scanner in;
+
 
 	// A utility function that
 	// executes statement from
@@ -130,6 +132,20 @@ public class Tables {
 		
 	}
 
+	public static void createScanner(String file){
+
+		try{
+			in = new Scanner(new File(file));
+			// Read line by line
+			in.useDelimiter("\n");
+			in.next();
+		}
+		catch(Exception e){
+			System.out.println("Unable to open csv file");
+			e.printStackTrace();
+		}
+	}
+
 	// This fills main table
 	// It takes in.csv as a 
 	// input and fills it into
@@ -137,12 +153,13 @@ public class Tables {
 	public static void fillMainTable(){
 
 		// Creating table cities
-		sql = "CREATE TABLE cities (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,"
-										  +"city VARCHAR(100),"
-										  +"lat DECIMAL(20,10),"
-										  +"lng DECIMAL(20,10),"
-										  +"state VARCHAR(100),"
-										  +"population INT)";
+		sql = "CREATE TABLE cities ("
+									+"city VARCHAR(100),"
+									+"lat DECIMAL(20,10),"
+									+"lng DECIMAL(20,10),"
+									+"state VARCHAR(100),"
+									+"population INT,"
+									+"PRIMARY KEY (city,state))";
 		
 
 		// Filling table cities
@@ -159,12 +176,8 @@ public class Tables {
 			// Create Table
 			executeStatement();
 
-
-			Scanner in = new Scanner(new File("./databases/in.csv"));
-			// Read line by line
-			in.useDelimiter("\n");
-			in.next();
 			String temp_sql = "INSERT INTO cities (city,lat,lng,state,population) VALUES (";
+			createScanner(new String("./databases/in.csv"));
 			while(in.hasNext()){
 				
 				String[] vs = in.next().split(",");
@@ -186,6 +199,51 @@ public class Tables {
 			System.out.println("Unable to fill main Table");
 			e.printStackTrace();
 		}
+	}
+
+	static void fillCrimeTables(String TableName){
+
+		// Creating table cities
+		String tempSql = "("
+				+"city VARCHAR(100),"
+				+"state VARCHAR(100),"
+				+"2001 INT,"
+				+"2002 INT,"
+				+"2003 INT,"
+				+"2004 INT,"
+				+"2005 INT,"
+				+"2006 INT,"
+				+"2007 INT,"
+				+"2008 INT,"
+				+"2009 INT,"
+				+"2010 INT,"
+				+"2011 INT,"
+				+"2012 INT,"
+				+"average INT AS ((2001+2002+2003+2004+2005"
+				+"+2006+2007+2008+2009+2010+2011+2012)/12),"
+				+"PRIMARY KEY (city,state)"
+				+"FOREIGN KEY (city,state) REFRENCES cities(city,state)"
+				+")";
+
+
+		createScanner(new String("crime.csv"));
+		while(in.hasNext()){
+			
+			String[] vs = in.next().split(",");
+			String temp_sql = "";
+			// Syncing the csv file data
+			// with sql syntax and
+			// inserting into cities table				
+			sql = temp_sql
+				  +"\'"+vs[0]+"\'"+","
+				  +vs[1]+","
+				  +vs[2]+","
+				  +"\'"+vs[3]+"\'"+","
+				  +vs[4]
+				  +")";
+			executeStatement();
+		}
+
 	}
 
 	// Constructor

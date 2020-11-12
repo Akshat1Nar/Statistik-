@@ -16,12 +16,13 @@ public class Setup {
    
 	public Setup() {
 
+		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("Welcome to Our Software");
 		System.out.println("Befor begining make sure you have following as an user");
+		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("USER : GroupProject");
 		System.out.println("PASSWORD : EasyPeasy");
 		System.out.println("-----------------------------------------------------------------------------------");
-		System.out.println("");
 		System.out.println("");
 			
 		
@@ -43,20 +44,25 @@ public class Setup {
 		
 					if(DATABASE_NAME.equals(catalogs)){
 						System.out.println("Database already existed");
+						System.out.println("-----------------------------------------------------------------------------------");
 						System.out.println("Checking for Tables...");
+						System.out.println("-----------------------------------------------------------------------------------");
 						return;
 					}
 			}
 
 			//STEP 4: Execute a query
 			System.out.println("Creating database...");
+			System.out.println("-----------------------------------------------------------------------------------");
 			stmt = conn.createStatement();
 			
 			String sql = "CREATE DATABASE RECORDS";
 			stmt.executeUpdate(sql);
 			System.out.println("Database created successfully!\n");
+			System.out.println("-----------------------------------------------------------------------------------");
 
 			System.out.println("Filling Tables...");
+			System.out.println("-----------------------------------------------------------------------------------");
 			new Tables();
 		}
 

@@ -12,22 +12,33 @@ import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MarkerManager;
 
+
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Popup.*;
+import javax.swing.event.*;
+import java.awt.*;
+
 public class Interface extends PApplet{
-	static Marker markedCity = null;
+
+	private static Marker markedCity = null;
 	private static final long serialVersionUID = 1L;
   	private static int mapWidth = 900;
     private static int mapHeight = 600;
+    private static int zoomLevel = 7;
+	private Popup popup = null;
+  
     
 	public static UnfoldingMap map;
 
+
 	@Override
 	public void setup() {
+
         this.size(900, 600);
   		this.background(0, 0, 128);
   		AbstractMapProvider provider = new OpenStreetMap.OpenStreetMapProvider();
   		// AbstractMapProvider provider = new Google.GoogleSimplifiedProvider();
-  
-        int zoomLevel = 7;
   
         map = new UnfoldingMap(this, 40, 50, mapWidth, mapHeight, provider);
         map.zoomAndPanTo( zoomLevel, new Location(28.7041f, 77.1025f));
@@ -45,7 +56,6 @@ public class Interface extends PApplet{
         Tables.sql = "SELECT * FROM cities";
 		Tables.executeStQuery();
 		Tables.fillMarkers();
-		
 	}
   
     // Function to draw the applet window 
@@ -58,15 +68,22 @@ public class Interface extends PApplet{
     } 
 
 	@Override
-    public void mouseClicked() {
+    public void mouseClicked(MouseEvent e) {
+
+    	if(mouseButton==LEFT){
+    		return;
+    	}
+
     	Marker hitMarker = map.getFirstHitMarker(mouseX, mouseY);
     	
     	if (hitMarker != null) {
     		System.out.println("Working");
     		System.out.println(hitMarker.getLocation().getLat()+" "+hitMarker.getLocation().getLon());
+    		System.out.println();
+
     		// Select current marker 
         	hitMarker.setSelected(true);
-        	
+        	popup = new Popup(mouseX, mouseY,e); 
         	markedCity = hitMarker;
     	} 
     	else {
@@ -74,6 +91,15 @@ public class Interface extends PApplet{
         	if(markedCity!=null)
 	        	markedCity.setSelected(false);
     	}
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+
+		if(popup!=null){
+			popup.setVisible(false);
+			popup = null;
+		}
 	}
 	
 	public static void main(String[] args){
