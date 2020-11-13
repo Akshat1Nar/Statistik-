@@ -11,6 +11,8 @@ import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MarkerManager;
+import java.net.URL;
+
 
 
 import java.awt.event.*;
@@ -77,13 +79,10 @@ public class Interface extends PApplet{
     	Marker hitMarker = map.getFirstHitMarker(mouseX, mouseY);
     	
     	if (hitMarker != null) {
-    		System.out.println("Working");
-    		System.out.println(hitMarker.getLocation().getLat()+" "+hitMarker.getLocation().getLon());
-    		System.out.println();
-
+    		
     		// Select current marker 
         	hitMarker.setSelected(true);
-        	popup = new Popup(mouseX, mouseY,e); 
+        	popup = new Popup(mouseX, mouseY,e,hitMarker.getLocation().getLat(),hitMarker.getLocation().getLon()); 
         	markedCity = hitMarker;
     	} 
     	else {
@@ -103,6 +102,7 @@ public class Interface extends PApplet{
 	}
 	
 	public static void main(String[] args){
+
 		String[] processingArgs = {"Interface"};
 		Interface face = new Interface();
 		PApplet.runSketch(processingArgs, face);

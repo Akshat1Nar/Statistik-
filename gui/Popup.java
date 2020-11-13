@@ -1,5 +1,7 @@
 package gui;
 
+import base.Query;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -17,15 +19,21 @@ import javax.swing.event.PopupMenuListener;
 
 public class Popup extends JPopupMenu {
 
-    public Popup(int x,int y,MouseEvent e) {
+    public Popup(int x,int y,MouseEvent e,float lat,float lng) {
         JMenuItem item;
+        Query.GetQuery(lat,lng);
 
-        add(item = new JMenuItem("Left", new ImageIcon("1.gif")));
-        add(item = new JMenuItem("Center", new ImageIcon("2.gif")));
-        add(item = new JMenuItem("Right", new ImageIcon("3.gif")));
-        add(item = new JMenuItem("Full", new ImageIcon("4.gif")));
+        for(int i=0;i<Query.ALL.length;i++){
+            add(item = new JMenuItem((Query.ALL[i]+" "+Query.ALLVALUES[i]), Query.ALLICONS[i]));
+        }
         addSeparator();
-        add(item = new JMenuItem("---Statistics---"));
+        if(Query.CITY==null){
+            add(item = new JMenuItem("Statistics/"));
+        }
+        else{
+            add(item = new JMenuItem("Statistics/"+Query.CITY));
+            Query.CITY = null;
+        }
         
       	setLabel("Statistics");
       	setBorder(new BevelBorder(BevelBorder.RAISED));

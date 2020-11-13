@@ -5,6 +5,7 @@ import java.util.Scanner;
 import gui.City;
 import gui.Interface;
 import de.fhpotsdam.unfolding.geo.Location;
+import java.util.ArrayList;
 
 
 // This class will be creating tables 
@@ -52,7 +53,7 @@ public class Tables {
 		}
 		catch(SQLException se) {
 		   //Handle errors for JDBC
-		   se.printStackTrace();
+		   // se.printStackTrace();
 		}
 	}
 
@@ -63,7 +64,7 @@ public class Tables {
 		}
 		catch(SQLException se) {
 		   //Handle errors for JDBC
-		   se.printStackTrace();
+		   // se.printStackTrace();
 		}	
 	}
 
@@ -77,16 +78,16 @@ public class Tables {
 		
 			while (rs.next()) {
 
-				String city = rs.getString(2);
-				String state = rs.getString(5);
+				String city = rs.getString(1);
+				String state = rs.getString(4);
 
-				String lat_ = rs.getString(3);
+				String lat_ = rs.getString(2);
 				double lat = Double.parseDouble(lat_);
 
-				String lng_ = rs.getString(4);
+				String lng_ = rs.getString(3);
 				double lng = Double.parseDouble(lng_);
 
-				String population_ = rs.getString(6);
+				String population_ = rs.getString(5);
 				int population = Integer.parseInt(population_);
 
 				// System.out.println(city+" "+state+" "+lat+" "+lng+" "+population);
@@ -99,7 +100,7 @@ public class Tables {
 		}
 		catch(Exception e){
 			System.out.println("Unable to extract query");
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 		
 	}
@@ -146,6 +147,27 @@ public class Tables {
 		}
 	}
 
+	public static boolean checkTableIfExists(String TableName){
+
+		try{
+
+			DatabaseMetaData dbm = conn.getMetaData();
+			ResultSet tables = dbm.getTables(null, null, TableName, null);
+			if (tables.next()) {
+			  	// Table exists do nothing
+			  	return true;
+			}
+			return false;
+		}
+		catch(Exception e){
+			System.out.println("Error in finding table");
+			e.printStackTrace();
+			return false;
+			
+		}
+
+	}
+
 	// This fills main table
 	// It takes in.csv as a 
 	// input and fills it into
@@ -155,8 +177,8 @@ public class Tables {
 		// Creating table cities
 		sql = "CREATE TABLE cities ("
 									+"city VARCHAR(100),"
-									+"lat DECIMAL(20,10),"
-									+"lng DECIMAL(20,10),"
+									+"lat DECIMAL(10,5),"
+									+"lng DECIMAL(10,5),"
 									+"state VARCHAR(100),"
 									+"population INT,"
 									+"PRIMARY KEY (city,state))";
@@ -165,13 +187,9 @@ public class Tables {
 		// Filling table cities
 		try{
 
-			DatabaseMetaData dbm = conn.getMetaData();
 			// check if "cities" table is there
-			ResultSet tables = dbm.getTables(null, null, "cities", null);
-			if (tables.next()) {
-			  	// Table exists do nothing
-			  	return;
-			}
+			if(checkTableIfExists(new String("cities")))
+				return;
 
 			// Create Table
 			executeStatement();
@@ -181,6 +199,8 @@ public class Tables {
 			while(in.hasNext()){
 				
 				String[] vs = in.next().split(",");
+				vs[0] = vs[0].toUpperCase();
+				vs[3] = vs[3].toUpperCase();
 
 				// Syncing the csv file data
 				// with sql syntax and
@@ -201,51 +221,119 @@ public class Tables {
 		}
 	}
 
-	static void fillCrimeTables(String TableName){
+	static void fillCrimeTables(String TableName,String file){
 
 		// Creating table cities
-		String tempSql = "("
+		String temp_sql = " ("
 				+"city VARCHAR(100),"
 				+"state VARCHAR(100),"
-				+"2001 INT,"
-				+"2002 INT,"
-				+"2003 INT,"
-				+"2004 INT,"
-				+"2005 INT,"
-				+"2006 INT,"
-				+"2007 INT,"
-				+"2008 INT,"
-				+"2009 INT,"
-				+"2010 INT,"
-				+"2011 INT,"
-				+"2012 INT,"
-				+"average INT AS ((2001+2002+2003+2004+2005"
-				+"+2006+2007+2008+2009+2010+2011+2012)/12),"
-				+"PRIMARY KEY (city,state)"
-				+"FOREIGN KEY (city,state) REFRENCES cities(city,state)"
+				+"`2001` INT DEFAULT 0,"
+				+"`2002` INT DEFAULT 0,"
+				+"`2003` INT DEFAULT 0,"
+				+"`2004` INT DEFAULT 0,"
+				+"`2005` INT DEFAULT 0,"
+				+"`2006` INT DEFAULT 0,"
+				+"`2007` INT DEFAULT 0,"
+				+"`2008` INT DEFAULT 0,"
+				+"`2009` INT DEFAULT 0,"
+				+"`2010` INT DEFAULT 0,"
+				+"`2011` INT DEFAULT 0,"
+				+"`2012` INT DEFAULT 0,"
+				+"average INT AS ((`2001`+`2002`+`2003`+`2004`+`2005`"
+				+"+`2006`+`2007`+`2008`+`2009`+`2010`+`2011`+`2012`)/12),"
+				+"FOREIGN KEY (city,state) REFERENCES cities(city,state)"
 				+")";
 
+		if(checkTableIfExists(TableName))
+			return;
 
-		createScanner(new String("crime.csv"));
-		while(in.hasNext()){
-			
-			String[] vs = in.next().split(",");
-			String temp_sql = "";
-			// Syncing the csv file data
-			// with sql syntax and
-			// inserting into cities table				
-			sql = temp_sql
-				  +"\'"+vs[0]+"\'"+","
-				  +vs[1]+","
-				  +vs[2]+","
-				  +"\'"+vs[3]+"\'"+","
-				  +vs[4]
-				  +")";
-			executeStatement();
+
+		sql = "CREATE TABLE " + TableName + temp_sql;
+		executeStatement();
+		createScanner(file);
+
+		String vs[] = in.next().split(",");
+		ArrayList<String> Year = new ArrayList<String>();
+		ArrayList<String> YearValues = new ArrayList<String>();
+		String city = "";
+		String state = "";
+
+		city = vs[1];
+		state = vs[0];
+		Year.add(vs[2]);
+		YearValues.add(vs[3]);
+		try{
+
+			while(in.hasNext()){
+
+				// If talking about same city
+				// keep collecting data
+				String temp[] = in.next().split(",");
+				if(temp[0].equals(state) && temp[1].equals(city)){
+					Year.add(temp[2]);
+					YearValues.add(temp[3]);
+				}
+				else{
+
+					// else fill the data
+					// into the table
+					String y = "";
+					String yv = "";
+
+					for(String each: Year){
+						y+=",";
+						y+="`";
+						y+=each;
+						y+="`";
+					}
+					for(String each: YearValues){
+						yv+=",";
+						yv+=each;
+					}
+
+
+
+					sql = "INSERT INTO "
+						  +TableName
+						  +" (city,state"
+						  +y
+						  +")"
+						  +" VALUES ("
+						  +"\'"
+						  +city
+						  +"\'"
+						  +","
+						  +"\'"
+						  +state
+						  +"\'"
+						  +yv
+						  +")";
+
+					
+					executeStatement();
+					Year.clear();
+					YearValues.clear();
+
+
+					if(in.hasNext()){
+						vs = in.next().split(",");
+						
+						city = vs[1];
+						state = vs[0];
+						Year.add(vs[2]);
+						YearValues.add(vs[3]);
+					}
+				}
+				
+				
+			}
+		}
+		catch(Exception e){
+			System.out.println("Error filling crime table "+TableName);
+			// e.printStackTrace();
 		}
 
 	}
-
 	// Constructor
 	// that initializes everything
 	public Tables(){
@@ -269,6 +357,10 @@ public class Tables {
 		}
 
 		fillMainTable();
+		fillCrimeTables("rape","./databases/rape.csv");
+		fillCrimeTables("theft","./databases/theft.csv");
+		fillCrimeTables("kidnapping","./databases/kidnapping.csv");
+		fillCrimeTables("murder","./databases/murder.csv");
 	
 	}
 
