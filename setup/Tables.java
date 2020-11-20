@@ -20,7 +20,7 @@ public class Tables {
 	public static final String DB_URL = "jdbc:mysql://localhost/";
 
 	//  Database credentials
-	public static final String USER = "GroupProject";
+	public static final String USER = "dbProject";
 	public static final String PASS = "EasyPeasy";
 
 	public static Connection conn = null;

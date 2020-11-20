@@ -8,7 +8,10 @@ public class Setup {
 	static final String DB_URL = "jdbc:mysql://localhost/";
 
 	//  Database credentials
-	static final String USER = "GroupProject";
+
+	// Replace user with root
+	// And password with your password
+	static final String USER = "dbProject";
 	static final String PASS = "EasyPeasy";
 
 	static Connection conn = null;
@@ -20,7 +23,7 @@ public class Setup {
 		System.out.println("Welcome to Our Software");
 		System.out.println("Befor begining make sure you have following as an user");
 		System.out.println("-----------------------------------------------------------------------------------");
-		System.out.println("USER : GroupProject");
+		System.out.println("USER : dbProject");
 		System.out.println("PASSWORD : EasyPeasy");
 		System.out.println("-----------------------------------------------------------------------------------");
 		System.out.println("");
