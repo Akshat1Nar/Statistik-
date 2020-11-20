@@ -33,7 +33,7 @@
 
 ### Run the Project
 
-  1. In setup/Setup.java replace with following
+  1. In setup/Setup.java and setup/Table.java replace with following
 
   > static final String USER = "root"
 
